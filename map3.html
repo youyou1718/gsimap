@@ -8,7 +8,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="description" content="地形図、写真、標高、地形分類、災害情報など、国土地理院が捉えた日本の国土の様子を発信するウェブ地図です。地形図や写真の3D表示も可能。">
 
-<title>map2 - マップアプリハンズオン</title>
+<title>map3 - マップアプリハンズオン</title>
 
 <link rel="stylesheet" href="js.lib/leaflet-1.2.0/leaflet.css" />
 <script type="text/javascript" src="js.lib/leaflet-1.2.0/leaflet.js"></script>
@@ -56,17 +56,45 @@
 <script type="text/javascript" src="js/muni.js"></script>
 <script type="text/javascript" src="js/jiki.js"></script>
 <noscript><div class="noscript">JavaScriptを有効にしてご覧ください。</div></noscript>
-<script type="text/javascript" src="easy-gsimap.js"></script>
+<script type="text/javascript" src="easy-gsimap.js"></script> <!-- マップアプリを作るための薄いフレームワーク -->
+<script type="text/javascript" src="fukuno.js"></script> <!-- 便利関数集 -->
+<script type="text/javascript" src="odp.js"></script><!-- SPARQLでodpへアクセスするためのライブラリ -->
 <script>"use strict";
 
 CONFIG.DEFAULT = { CENTER : [ 35.943560, 136.188917 ], ZOOM : 17 };
 
 const gsimap_init = function(map, layer) {
     maplogo.textContent = "GSIMAP" // タイトル変更
-    
-    layer.addIcon(35.943560, 136.188917, "鯖江駅", "icon/icon-purple.png", 32)
 
-//    layer.addIcon(35.942729, 136.198846, "めがね会館", "icon/icon-green.png", 64)
+    layer.addIcon(35.943560, 136.188917, "鯖江駅", "icon/icon-purple.png", 32)
+    layer.addIcon(35.942729, 136.198846, "めがね会館", "icon/icon-purple.png", 32)
+
+    // SPARQLエンドポイント
+    setSPARQLEndpoint("https://sparql.opendata.cc/data/sparql")
+
+    // SPARQLクエリー
+	var query = `
+        prefix ic: <http://imi.go.jp/ns/core/rdf#>
+        
+		select ?uri ?name ?lat ?lng {
+			?uri ic:名称 [ ic:表記 ?name ].
+			?uri ic:地理座標 [ ic:緯度 ?lat; ic:経度 ?lng; ].
+			filter(contains(str(?name),'駐車場'))
+        } limit 100
+    `
+
+	querySPARQL(query, function(data) {
+		var items = data.results.bindings;
+		for (var i = 0; i < items.length; i++) {
+			var item = items[i];
+			
+			var lat = item.lat.value;
+			var lng = item.lng.value;
+            var name = item.name.value;
+            
+            layer.addIcon(lat, lng, name, "icon/icon-green.png", 32)
+		}
+	});
 }
 
 </script>
