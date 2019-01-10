@@ -40,7 +40,8 @@ var init = function() {
             }
         );
         marker.on("click", function() {
-            callback(name);
+            if (callback)
+                callback(name);
         });
         this.addLayer(marker);
         return marker
