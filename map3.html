@@ -79,7 +79,7 @@ const gsimap_init = function(map, layer) {
 		select ?uri ?name ?lat ?lng {
 			?uri ic:名称 [ ic:表記 ?name ].
 			?uri ic:地理座標 [ ic:緯度 ?lat; ic:経度 ?lng; ].
-			filter(contains(str(?name),'駐車場'))
+			filter(contains(str(?name),'駐 車 場☆'))
         } limit 100
     `
 
